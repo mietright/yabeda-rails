@@ -24,30 +24,31 @@ module Yabeda
           group :rails
 
           counter   :requests_total,   comment: "A counter of the total number of HTTP requests rails processed.",
-                                       tags: %i[controller action status format method]
+                                       tags: %i[application controller action status format method]
 
-          histogram :request_duration, tags: %i[controller action status format method],
+          histogram :request_duration, tags: %i[application controller action status format method],
                                        unit: :seconds,
                                        buckets: LONG_RUNNING_REQUEST_BUCKETS,
                                        comment: "A histogram of the response latency."
 
           histogram :view_runtime, unit: :seconds, buckets: LONG_RUNNING_REQUEST_BUCKETS,
                                    comment: "A histogram of the view rendering time.",
-                                   tags: %i[controller action status format method]
+                                   tags: %i[application controller action status format method]
 
           histogram :db_runtime, unit: :seconds, buckets: LONG_RUNNING_REQUEST_BUCKETS,
                                  comment: "A histogram of the activerecord execution time.",
-                                 tags: %i[controller action status format method]
+                                 tags: %i[application controller action status format method]
 
           ActiveSupport::Notifications.subscribe "process_action.action_controller" do |*args|
             event = ActiveSupport::Notifications::Event.new(*args)
             labels = {
+              application: ENV['APPLICATION_NAME'],
               controller: event.payload[:params]["controller"],
               action: event.payload[:params]["action"],
               status: event.payload[:status],
               format: event.payload[:format],
               method: event.payload[:method].downcase,
-            }
+            }.compact
 
             rails_requests_total.increment(labels)
             rails_request_duration.measure(labels, Yabeda::Rails.ms2s(event.duration))
