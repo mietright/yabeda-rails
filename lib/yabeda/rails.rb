@@ -46,7 +46,7 @@ module Yabeda
               application: ENV.fetch('APPLICATION_NAME'),
               controller: event.payload[:params]["controller"],
               environment: ENV.fetch('RAILS_ENV', 'development'),
-              format: event.payload[:format],
+              format: event.payload[:format] || "html",
               method: event.payload[:method].downcase,
               status: event.payload[:status] || "",
             }.compact
