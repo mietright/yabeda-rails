@@ -43,7 +43,7 @@ module Yabeda
             event = ActiveSupport::Notifications::Event.new(*args)
             labels = {
               action: event.payload[:params]["action"],
-              application: ENV.fetch('APPLICATION_NAME'),
+              application: ENV.fetch('APPLICATION_NAME', ENV['PRODUCT_NAME']),
               controller: event.payload[:params]["controller"],
               environment: ENV.fetch('RAILS_ENV', 'development'),
               format: event.payload[:format] || "html",
